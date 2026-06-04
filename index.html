@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bodh Dosha Quiz — Know Your Prakriti</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  button { font-family: inherit; }
+  input { font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const WEBHOOK_URL = "https://hook.us2.make.com/yg8ppnxroo8a4bx1mya0yaj459grwfl7";
+
+const C = {
+  orange: "#C45E0A", teal: "#1A6B5A", cream: "#FAF6F0",
+  gold: "#E8C44A", charcoal: "#2C1810", grey: "#857D75",
+  navy: "#1E2840", tealLight: "#D4EBE5", mint: "#EAF5F0",
+  white: "#FFFFFF", vata: "#8B6FE8", pitta: "#E85B45", kapha: "#4A9B6F",
+};
+
+const QUESTIONS = [
+  { category: "Body", q: "My natural body frame is:", opts: [
+    { label: "Thin, light, hard to gain weight", V:3, P:0, K:0 },
+    { label: "Medium, muscular, gains and loses weight easily", V:0, P:3, K:0 },
+    { label: "Broad, solid, gains weight easily, hard to lose", V:0, P:0, K:3 },
+  ]},
+  { category: "Body", q: "My skin is typically:", opts: [
+    { label: "Dry, rough, or flaky — especially in winter", V:3, P:0, K:0 },
+    { label: "Oily in the T-zone, warm, prone to redness or breakouts", V:0, P:3, K:0 },
+    { label: "Smooth, thick, cool, and naturally moisturised", V:0, P:0, K:3 },
+  ]},
+  { category: "Body", q: "My hair is:", opts: [
+    { label: "Dry, frizzy, fine, or brittle", V:3, P:0, K:0 },
+    { label: "Straight, fine, prone to early greying or hair loss", V:0, P:3, K:0 },
+    { label: "Thick, wavy, oily, and lustrous", V:0, P:0, K:3 },
+  ]},
+  { category: "Body", q: "My eyes are:", opts: [
+    { label: "Small, dry, or move quickly", V:3, P:0, K:0 },
+    { label: "Sharp, bright, medium-sized, sensitive to light", V:0, P:3, K:0 },
+    { label: "Large, soft, calm, with thick lashes", V:0, P:0, K:3 },
+  ]},
+  { category: "Body", q: "My hands and joints:", opts: [
+    { label: "Cold, dry, crack easily, feel stiff in winter", V:3, P:0, K:0 },
+    { label: "Warm, slightly sweaty, moderate size", V:0, P:3, K:0 },
+    { label: "Large, cool, well-padded, rarely crack", V:0, P:0, K:3 },
+  ]},
+  { category: "Digestion", q: "My digestion and appetite feel:", opts: [
+    { label: "Variable — sometimes ravenous, sometimes no appetite at all", V:3, P:0, K:0 },
+    { label: "Strong and consistent — I get irritable if I skip meals", V:0, P:3, K:0 },
+    { label: "Slow but steady — I can skip meals without much discomfort", V:0, P:0, K:3 },
+  ]},
+  { category: "Digestion", q: "After eating a meal, I usually feel:", opts: [
+    { label: "Gassy or bloated — especially with raw or cold food", V:3, P:0, K:0 },
+    { label: "Sharp or burning if I eat too late or too spicy", V:0, P:3, K:0 },
+    { label: "Sluggish or heavy, need to rest or move after eating", V:0, P:0, K:3 },
+  ]},
+  { category: "Digestion", q: "My energy levels through the day feel:", opts: [
+    { label: "Burst-and-crash — high energy then sudden exhaustion", V:3, P:0, K:0 },
+    { label: "Steady and intense — I push hard but burn out under stress", V:0, P:3, K:0 },
+    { label: "Slow to start, consistent once going, hard to stop", V:0, P:0, K:3 },
+  ]},
+  { category: "Digestion", q: "I feel most sluggish or unwell when:", opts: [
+    { label: "It's cold, windy, or dry outside", V:3, P:0, K:0 },
+    { label: "It's hot, humid, or I've eaten spicy food", V:0, P:3, K:0 },
+    { label: "It's cold and damp, or I've been sedentary for a while", V:0, P:0, K:3 },
+  ]},
+  { category: "Mind", q: "My thinking style is:", opts: [
+    { label: "Fast, creative, jumping between ideas — hard to focus", V:3, P:0, K:0 },
+    { label: "Sharp, analytical, decisive — I get frustrated by slow thinkers", V:0, P:3, K:0 },
+    { label: "Deliberate and methodical — I think things through carefully", V:0, P:0, K:3 },
+  ]},
+  { category: "Mind", q: "When I learn something new:", opts: [
+    { label: "I grasp it quickly but forget it equally fast", V:3, P:0, K:0 },
+    { label: "I understand it quickly and retain it well", V:0, P:3, K:0 },
+    { label: "It takes me time to absorb but once I know it, I never forget", V:0, P:0, K:3 },
+  ]},
+  { category: "Mind", q: "When making decisions, I tend to:", opts: [
+    { label: "Change my mind often — I feel anxious about committing", V:3, P:0, K:0 },
+    { label: "Decide quickly and confidently — and get annoyed if questioned", V:0, P:3, K:0 },
+    { label: "Take time to decide but once I do, I rarely change course", V:0, P:0, K:3 },
+  ]},
+  { category: "Emotions", q: "Under stress, I most often feel:", opts: [
+    { label: "Anxious, worried, overwhelmed, scattered", V:3, P:0, K:0 },
+    { label: "Irritable, critical, angry, controlling", V:0, P:3, K:0 },
+    { label: "Withdrawn, stubborn, unmotivated, stuck", V:0, P:0, K:3 },
+  ]},
+  { category: "Emotions", q: "My emotional baseline is:", opts: [
+    { label: "Enthusiastic but emotionally sensitive and easily anxious", V:3, P:0, K:0 },
+    { label: "Passionate and driven but prone to frustration and intensity", V:0, P:3, K:0 },
+    { label: "Calm, consistent, and content — but I can become complacent", V:0, P:0, K:3 },
+  ]},
+  { category: "Emotions", q: "I deal with conflict by:", opts: [
+    { label: "Avoiding it — I worry about it for days afterwards", V:3, P:0, K:0 },
+    { label: "Confronting it directly — I want to resolve it immediately", V:0, P:3, K:0 },
+    { label: "Withdrawing quietly — I'll deal with it eventually in my own time", V:0, P:0, K:3 },
+  ]},
+  { category: "Sleep", q: "My sleep pattern is:", opts: [
+    { label: "Light, interrupted, vivid dreams — I wake easily", V:3, P:0, K:0 },
+    { label: "Moderate — I sleep well but wake if too hot or stressed", V:0, P:3, K:0 },
+    { label: "Deep and long — I find it hard to wake up in the morning", V:0, P:0, K:3 },
+  ]},
+  { category: "Sleep", q: "In the mornings I feel:", opts: [
+    { label: "Alert immediately but already slightly anxious", V:3, P:0, K:0 },
+    { label: "Ready to act — I want to get things done straight away", V:0, P:3, K:0 },
+    { label: "Slow and foggy — I need time (and coffee) to feel awake", V:0, P:0, K:3 },
+  ]},
+  { category: "Movement", q: "My exercise style or preference:", opts: [
+    { label: "I love movement but exhaust myself easily — better with gentle, consistent exercise", V:3, P:0, K:0 },
+    { label: "I'm competitive — I push hard and love challenge and intensity", V:0, P:3, K:0 },
+    { label: "I enjoy slow, rhythmic movement — I need motivation to start but love endurance", V:0, P:0, K:3 },
+  ]},
+  { category: "Movement", q: "My speech and movement are:", opts: [
+    { label: "Fast, talkative, sometimes scattered or forgetting what I was saying", V:3, P:0, K:0 },
+    { label: "Direct, purposeful, and precise — I don't waste words", V:0, P:3, K:0 },
+    { label: "Slow, deliberate, and considered — I think before I speak", V:0, P:0, K:3 },
+  ]},
+  { category: "Movement", q: "My relationship with routine is:", opts: [
+    { label: "I crave it but struggle to maintain it — I get bored or distracted", V:3, P:0, K:0 },
+    { label: "I create strong routines and expect others to follow them too", V:0, P:3, K:0 },
+    { label: "I thrive on routine — I love consistency and find change difficult", V:0, P:0, K:3 },
+  ]},
+];
+
+const PROFILES = {
+  "V-P-K": { title: "Vata–Pitta", subtitle: "The Creative Visionary", color: C.vata,
+    tagline: "You move fast, think faster, and feel everything deeply.",
+    summary: "Your Vata drives creativity, spontaneity, and a restless brilliant mind. Your Pitta adds sharp focus, ambition, and a drive to make things happen. Together they make you one of the most dynamic and inspiring people in any room — and also one of the most prone to burnout when you don't rest.",
+    strengths: ["Creative and highly intuitive","Analytically sharp when grounded","Natural communicator and visionary","Quick learner with entrepreneurial energy"],
+    challenges: ["Anxiety and overthinking under stress","Tendency to overcommit and exhaust yourself","Inflammatory conditions — skin, gut, joints","Difficulty slowing down even when the body needs it"],
+    food: ["Warm, grounding, slightly oily foods — kitchari, ghee, root vegetables","Cooling spices — coriander, fennel, mint","Avoid raw salads, cold drinks, excessive spice, caffeine","Eat at the same time every day — this is medicine for Vata-Pitta"],
+    rituals: ["Abhyanga (warm oil self-massage) before shower — daily","CCF tea (cumin, coriander, fennel) — morning and evening","10 minutes of slow pranayama before bed — not screens","Shatavari + ashwagandha together — the classical Vata-Pitta tonic duo"],
+    season: "You suffer most in late summer (Pitta season) and in autumn-winter transitions (Vata season). Prioritise rituals in August–November.",
+    hormoneNote: "High Vata-Pitta is the most common constitutional pattern in PCOS. Vata disrupts cycle regularity. Pitta drives inflammation and insulin resistance. Triphala, shatavari, and seed cycling are your power tools.",
+  },
+  "V-K-P": { title: "Vata–Kapha", subtitle: "The Grounded Dreamer", color: C.vata,
+    tagline: "You oscillate between creative restlessness and deep comfort-seeking.",
+    summary: "A rare and fascinating combination. Your Vata creates restlessness, creativity, and sensitivity. Your Kapha provides deep reserves of stamina, emotional steadiness, and a powerful need for comfort and stability.",
+    strengths: ["Deeply empathetic and emotionally intelligent","Creative with strong follow-through when motivated","Excellent memory and thoughtful decision making","Calm in crises when grounded"],
+    challenges: ["Cold, damp, and stagnation — physically and emotionally","Weight fluctuations and slow metabolism","Procrastination and difficulty starting things","Anxiety when Vata flares, lethargy when Kapha dominates"],
+    food: ["Warm, light, spiced foods — avoid heavy dairy and wheat","Ginger, black pepper, mustard seeds, turmeric every day","Avoid cold food, iced drinks, excessive sweets","Warm water with lemon and ginger first thing every morning"],
+    rituals: ["Dry brushing (garshana) before shower","Trikatu with honey in the morning","Vigorous walks outside — even 20 minutes transforms the day","Brahmi tea at night for Vata anxiety"],
+    season: "You suffer most in winter and spring (Kapha season) and late autumn (Vata). Build your strongest rituals from October–March.",
+    hormoneNote: "Vata-Kapha patterns often show as hypothyroid tendencies, PCOS with weight gain, and fatigue that doesn't resolve with rest.",
+  },
+  "P-V-K": { title: "Pitta–Vata", subtitle: "The Driven Creator", color: C.pitta,
+    tagline: "You're on fire — and sometimes you burn through yourself.",
+    summary: "Your Pitta is in the lead: sharp, ambitious, decisive, and intense. Your Vata brings creativity and speed. Together this makes you extraordinarily capable and driven — but also the most likely to burn out when you ignore your body's signals.",
+    strengths: ["Natural leader and high achiever","Sharp analytical and creative mind","Gets things done under pressure","Articulate, persuasive, and precise"],
+    challenges: ["Burnout — you push until you collapse","Inflammation: acne, rashes, acid reflux","Anxiety and perfectionism feeding each other","Difficulty delegating or accepting help"],
+    food: ["Cooling, anti-inflammatory meals — cucumber raita, mint chutney, coconut","Avoid spicy, sour, fermented foods, alcohol, caffeine","Never skip meals","Rose water, coriander water, and pomegranate daily"],
+    rituals: ["Cold-press coconut oil on the crown and soles of feet before bed","Rose + sandalwood face oil","Avoid screens 1 hour before bed","Moon Milk (shatavari, ashwagandha, cardamom, oat milk) before bed"],
+    season: "Summer is your most critical season. Front-load your cooling rituals in June–September.",
+    hormoneNote: "Pitta-Vata is the classic PCOS with inflammation and irregular cycles pattern. Lowering cortisol (ashwagandha) and reducing gut inflammation (triphala) is your hormonal root treatment.",
+  },
+  "P-K-V": { title: "Pitta–Kapha", subtitle: "The Powerful Anchor", color: C.pitta,
+    tagline: "You have the fire to transform and the earth to hold it.",
+    summary: "Pitta gives you drive, leadership, and a remarkable ability to get things done. Kapha gives you endurance, loyalty, and emotional depth. You are one of the most formidable combinations.",
+    strengths: ["Strong, consistent, and highly dependable","Natural leader who earns loyalty over time","Powerful digestion and physical endurance","Emotionally steady under real pressure"],
+    challenges: ["Weight gain around the midsection","Stubbornness — you know you're right","Congestion, sluggish lymph, cholesterol tendencies","Difficulty expressing vulnerability"],
+    food: ["Light, spiced, bitter foods — arugula, bitter gourd, leafy greens","Avoid excessive dairy, fried food, and sugar","Pomegranate molasses, turmeric, coriander, and cumin daily","Intentional fasting windows"],
+    rituals: ["Vigorous daily movement — you need to sweat","Dry brushing and cold-rinse shower","Triphala every night","Kanchanara guggulu for thyroid and lymph support (consult practitioner)"],
+    season: "Spring (Kapha season) and summer (Pitta season) both challenge you. March–August requires consistent vigilance.",
+    hormoneNote: "Pitta-Kapha patterns are associated with insulin resistance, PCOS with weight gain, and hypothyroid tendencies.",
+  },
+  "K-V-P": { title: "Kapha–Vata", subtitle: "The Steady Dreamer", color: C.kapha,
+    tagline: "You have the depth to feel everything and the roots to survive it.",
+    summary: "Your Kapha foundation makes you emotionally deep, physically resilient, and profoundly loyal. Your secondary Vata adds creativity, sensitivity, and a richly imaginative inner world.",
+    strengths: ["Deeply empathetic and emotionally reliable","Creative imagination with real staying power","Excellent memory and nurturing nature","Physical stamina once warmed up"],
+    challenges: ["Stagnation — physical, emotional, and mental","Tendency toward emotional eating","Anxiety running under the surface of apparent calm","Slow metabolism and difficulty with weight management"],
+    food: ["Warm, light, and well-spiced meals — mung dal, light soups","Ginger and black pepper in everything","Avoid cold, heavy, sweet foods and excessive dairy","Morning: warm water + ginger + lemon + pinch of black pepper"],
+    rituals: ["Vigorous abhyanga with warm sesame oil","Brahmi tea in the evening","Triphala every night","Daily sun exposure and outdoor movement"],
+    season: "You struggle most in winter and spring. January–April is your critical window.",
+    hormoneNote: "Kapha-Vata often presents as low thyroid function, amenorrhea, and difficulty losing weight.",
+  },
+  "K-P-V": { title: "Kapha–Pitta", subtitle: "The Embodied Leader", color: C.kapha,
+    tagline: "You are the most physically powerful combination in Ayurveda.",
+    summary: "Kapha gives you a powerful, enduring physical body with extraordinary immune resilience. Pitta adds ambition, sharp thinking, and a quiet fire that drives you to build things of lasting value.",
+    strengths: ["Exceptional physical strength and endurance","Strategic thinker who builds for the long game","Loyal, warm, and deeply protective","Strong immunity and natural resilience"],
+    challenges: ["Lethargy and low motivation when Kapha dominates","Inflammation and congestion running simultaneously","Weight gain that feels disproportionate","Emotional suppression — you hold feelings in the body"],
+    food: ["Bitter, pungent, and light — arugula, mustard greens, turmeric","Pomegranate, berries, lime","Avoid dairy in excess, heavy grains, fried food","Eat your largest meal at lunch"],
+    rituals: ["Kapalbhati pranayama every morning","Cold shower after exercise","Triphala nightly","Punarnava and turmeric for lymph (consult practitioner)"],
+    season: "Spring and summer are your twin challenge seasons.",
+    hormoneNote: "Kapha-Pitta is associated with PCOS with weight and inflammation, fibroids, and oestrogen dominance.",
+  },
+  "V-V-V": { title: "Pure Vata", subtitle: "The Original Creative Force", color: C.vata,
+    tagline: "You are air and space — brilliant, restless, and beautifully untameable.",
+    summary: "Pure Vata constitutions are rare and remarkable. You are deeply creative, intuitive, and sensitive. Without grounding, you scatter — your energy, your focus, your health.",
+    strengths: ["Extraordinarily creative and innovative","Highly intuitive and spiritually sensitive","Adaptable and quick to respond to change","Magnetic communicator and connector"],
+    challenges: ["Anxiety, insomnia, and nervous system dysregulation","Chronic constipation or IBS","Difficulty maintaining weight and energy","Scattered focus and decision fatigue"],
+    food: ["Warm, oily, sweet, salty, and sour — every meal","Ghee is your medicine. Use it generously","Avoid raw, cold, dry, or bitter foods","Kitchari, warm soups, sesame, warm milk with ashwagandha"],
+    rituals: ["Abhyanga daily — non-negotiable for pure Vata","Nadi shodhana morning and night","Consistent sleep schedule — Vata needs routine like a plant needs water","Triphala every night plus ashwagandha every morning"],
+    season: "Autumn and early winter (October–January) are your most vulnerable months.",
+    hormoneNote: "Pure Vata often presents as absent or very light periods, amenorrhea, and adrenal fatigue. Shatavari and ashwagandha are your primary hormonal medicine.",
+  },
+  "P-P-P": { title: "Pure Pitta", subtitle: "The Transformative Fire", color: C.pitta,
+    tagline: "You are fire — capable of illuminating everything, or consuming it.",
+    summary: "Pure Pitta constitutions are intense, precise, and extraordinarily capable. You have the strongest digestion, the sharpest mind, and a natural authority. Your shadow is that you can be too much — too hot, too critical, too relentless.",
+    strengths: ["Exceptional focus, intelligence, and execution","Strong physical stamina and digestion","Natural leader and teacher","Driven to understand everything deeply"],
+    challenges: ["Inflammation — skin, gut, liver, joints","Perfectionism that becomes self-destructive","Difficulty with compassion for self and others","Burnout from relentless high standards"],
+    food: ["Cooling, sweet, bitter, and astringent foods","Coconut, coriander, fennel, mint, lime, pomegranate daily","Avoid chilli, garlic, alcohol, coffee, fermented foods","Rose water and coriander water daily"],
+    rituals: ["Rose and sandalwood oil — facial and body, every evening","Sheetali pranayama before bed","Moon bath — sit outside under moonlight when possible","Shatavari in cool coconut milk before bed"],
+    season: "Summer is your critical season. Pre-empt inflammation with cooling rituals from May.",
+    hormoneNote: "Pure Pitta often presents as heavy, painful periods, acne, liver inflammation. Shatavari, aloe vera, and pomegranate molasses are your primary hormonal medicines.",
+  },
+  "K-K-K": { title: "Pure Kapha", subtitle: "The Timeless Foundation", color: C.kapha,
+    tagline: "You are earth and water — the body that endures, loves, and holds the world.",
+    summary: "Pure Kapha constitutions have the most powerful physical bodies in Ayurveda — strongest immunity, deepest emotional reserves, greatest capacity for loyalty and endurance. Your challenge is activation.",
+    strengths: ["Extraordinary physical resilience and immunity","Deep emotional intelligence and loyalty","Exceptional memory and patience","Natural nurturer and anchor for others"],
+    challenges: ["Weight gain and slow metabolism","Congestion — respiratory and lymphatic","Emotional heaviness and hoarding patterns","Difficulty initiating — starting is the battle"],
+    food: ["Light, dry, spiced, bitter, and pungent — every meal","Trikatu (ginger, black pepper, long pepper) daily","Avoid dairy, wheat, sugar, heavy or oily foods","Fasting one day per week suits pure Kapha best"],
+    rituals: ["Vigorous exercise every single day — this is your medicine","Garshana (dry silk glove brushing) before shower","Triphala every night + trikatu every morning","Avoid napping — Kapha sleep during the day increases lethargy"],
+    season: "Winter and spring are your most critical seasons. November–April requires daily movement.",
+    hormoneNote: "Pure Kapha often presents with hypothyroid, PCOS with weight, heavy periods with clots. Kanchanara guggulu and vigorous daily movement are your primary hormonal interventions.",
+  },
+};
+
+function getProfileKey(V, P, K) {
+  const total = V + P + K;
+  const vPct = V/total, pPct = P/total, kPct = K/total;
+  if (vPct > 0.55) return "V-V-V";
+  if (pPct > 0.55) return "P-P-P";
+  if (kPct > 0.55) return "K-K-K";
+  const ranked = [{d:"V",v:V},{d:"P",v:P},{d:"K",v:K}].sort((a,b)=>b.v-a.v);
+  return `${ranked[0].d}-${ranked[1].d}-${ranked[2].d}`;
+}
+
+const CAT_COLORS = {
+  Body: C.orange, Digestion: C.teal, Mind: C.navy,
+  Emotions: "#9C5AB5", Sleep: "#2C7BB5", Movement: C.kapha,
+};
+
+const ProgressBar = ({current, total}) => (
+  <div style={{width:"100%",height:4,background:"#E8DDD0",borderRadius:2,marginBottom:32}}>
+    <div style={{height:"100%",borderRadius:2,background:`linear-gradient(to right,${C.teal},${C.orange})`,width:`${(current/total)*100}%`,transition:"width 0.4s ease"}}/>
+  </div>
+);
+
+const DoshaBar = ({label, value, max, color}) => (
+  <div style={{marginBottom:14}}>
+    <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+      <span style={{fontSize:13,fontWeight:700,letterSpacing:"0.1em",color}}>{label}</span>
+      <span style={{fontSize:13,color:C.grey}}>{Math.round((value/max)*100)}%</span>
+    </div>
+    <div style={{height:8,background:"#E8DDD0",borderRadius:4,overflow:"hidden"}}>
+      <div style={{height:"100%",borderRadius:4,background:color,width:`${(value/max)*100}%`,transition:"width 1s ease 0.3s"}}/>
+    </div>
+  </div>
+);
+
+const Section = ({icon, title, children, borderColor}) => (
+  <div style={{background:C.white,borderRadius:12,padding:24,marginBottom:16,borderLeft:`4px solid ${borderColor||C.teal}`}}>
+    <p style={{fontSize:12,fontWeight:700,letterSpacing:"0.16em",color:borderColor||C.teal,textTransform:"uppercase",marginBottom:12}}>{icon} {title}</p>
+    {children}
+  </div>
+);
+
+const EmailGate = ({profileTitle, onSubmit, onSkip}) => {
+  const [email, setEmail] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
+
+  const handleSubmit = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) { setError("Please enter a valid email address."); return; }
+    setLoading(true); setError("");
+    try {
+      // Use GET request to bypass CORS restrictions
+      const params = new URLSearchParams({
+        email: email,
+        dosha_result: profileTitle,
+        source: "Bodh Dosha Quiz"
+      });
+      await fetch(WEBHOOK_URL + "?" + params.toString(), {
+        method: "GET",
+        mode: "no-cors",
+      });
+    } catch(e) {}
+    setLoading(false);
+    onSubmit(email);
+  };
+
+  return (
+    <div style={{minHeight:"100vh",background:C.charcoal,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px 16px"}}>
+      <div style={{maxWidth:480,width:"100%",textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:20}}>🌿</div>
+        <p style={{fontSize:11,fontWeight:700,letterSpacing:"0.3em",color:C.gold,textTransform:"uppercase",marginBottom:12}}>The Bodh Life</p>
+        <h2 style={{fontSize:34,fontWeight:700,color:C.white,lineHeight:1.15,marginBottom:12}}>Your results are ready.</h2>
+        <p style={{fontStyle:"italic",fontSize:18,color:"rgba(250,246,240,0.75)",marginBottom:32,lineHeight:1.6}}>
+          Enter your email to receive your full <strong style={{color:C.gold}}>{profileTitle}</strong> profile — food, rituals, and hormonal protocol — straight to your inbox.
+        </p>
+        <input type="email" placeholder="your@email.com" value={email}
+          onChange={e=>setEmail(e.target.value)}
+          onKeyDown={e=>e.key==="Enter"&&handleSubmit()}
+          style={{width:"100%",padding:"16px 20px",borderRadius:10,border:`2px solid ${error?C.pitta:"rgba(250,246,240,0.15)"}`,background:"rgba(250,246,240,0.08)",color:C.white,fontSize:17,outline:"none",marginBottom:8}}/>
+        {error && <p style={{fontSize:13,color:C.pitta,marginBottom:8}}>{error}</p>}
+        <button onClick={handleSubmit} disabled={loading} style={{width:"100%",padding:"17px 0",borderRadius:10,background:loading?C.grey:`linear-gradient(135deg,${C.orange},${C.teal})`,border:"none",color:C.white,fontSize:17,fontWeight:700,letterSpacing:"0.08em",cursor:loading?"not-allowed":"pointer",textTransform:"uppercase",marginBottom:16}}>
+          {loading?"Sending...":"Send My Results →"}
+        </button>
+        <button onClick={onSkip} style={{background:"none",border:"none",color:"rgba(250,246,240,0.35)",fontSize:13,cursor:"pointer",textDecoration:"underline"}}>
+          Skip — just show me my results
+        </button>
+        <p style={{marginTop:20,fontSize:11,color:"rgba(250,246,240,0.25)",lineHeight:1.6}}>No spam, ever. Unsubscribe anytime.<br/>Created by @thebodhlife.</p>
+      </div>
+    </div>
+  );
+};
+
+function DoshaQuiz() {
+  const [step, setStep] = React.useState("intro");
+  const [qi, setQi] = React.useState(0);
+  const [scores, setScores] = React.useState({V:0,P:0,K:0});
+  const [selected, setSelected] = React.useState(null);
+  const [animating, setAnimating] = React.useState(false);
+
+  const q = QUESTIONS[qi];
+
+  const handleNext = () => {
+    if (!selected || animating) return;
+    setAnimating(true);
+    const ns = {V:scores.V+selected.V, P:scores.P+selected.P, K:scores.K+selected.K};
+    setTimeout(() => {
+      setScores(ns); setSelected(null); setAnimating(false);
+      if (qi+1 >= QUESTIONS.length) { setStep("email"); } else { setQi(qi+1); }
+    }, 280);
+  };
+
+  const handleRestart = () => { setStep("intro"); setQi(0); setScores({V:0,P:0,K:0}); setSelected(null); };
+
+  const profileKey = getProfileKey(scores.V, scores.P, scores.K);
+  const profile = PROFILES[profileKey] || PROFILES["V-P-K"];
+  const maxVal = Math.max(scores.V, scores.P, scores.K);
+
+  if (step === "intro") return (
+    <div style={{minHeight:"100vh",background:C.charcoal,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px 16px"}}>
+      <div style={{maxWidth:540,width:"100%"}}>
+        <div style={{textAlign:"center",marginBottom:40}}>
+          <p style={{fontSize:11,fontWeight:700,letterSpacing:"0.3em",color:C.gold,textTransform:"uppercase",marginBottom:12}}>The Bodh Life</p>
+          <h1 style={{fontSize:42,fontWeight:700,color:C.white,lineHeight:1.1,marginBottom:8}}>Know Your<br/><span style={{color:C.orange}}>Prakriti.</span></h1>
+          <p style={{fontStyle:"italic",fontSize:20,color:C.cream,opacity:0.85,marginBottom:24}}>Discover your Ayurvedic constitution —<br/>and what it means for your hormones, gut, and mind.</p>
+          <div style={{display:"flex",justifyContent:"center",gap:12,marginBottom:32}}>
+            {[["🌬","Vata",C.vata],["🔥","Pitta",C.pitta],["🌿","Kapha",C.kapha]].map(([e,d,c])=>(
+              <div key={d} style={{background:c+"22",border:`1px solid ${c}44`,borderRadius:12,padding:"12px 18px",textAlign:"center"}}>
+                <div style={{fontSize:22}}>{e}</div>
+                <div style={{fontSize:12,fontWeight:700,color:c,letterSpacing:"0.1em"}}>{d}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{background:"rgba(250,246,240,0.07)",borderRadius:16,padding:28,border:"1px solid rgba(250,246,240,0.12)",marginBottom:28}}>
+          <p style={{color:C.cream,lineHeight:1.7,marginBottom:16,opacity:0.88}}>This 20-question quiz maps your body, mind, digestion, emotions, and sleep to determine your unique tridosha order.</p>
+          <p style={{color:C.cream,lineHeight:1.7,opacity:0.7,fontSize:14}}>Answer based on how you've been feeling over the <strong style={{color:C.gold}}>past 3–6 months</strong>. There are no right answers.</p>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:32}}>
+          {[["20","Questions"],["7 min","To complete"],["9","Result profiles"]].map(([n,l])=>(
+            <div key={l} style={{background:"rgba(250,246,240,0.05)",borderRadius:10,padding:"14px 10px",textAlign:"center",border:"1px solid rgba(250,246,240,0.1)"}}>
+              <div style={{fontSize:22,fontWeight:700,color:C.gold}}>{n}</div>
+              <div style={{fontSize:11,color:C.cream,opacity:0.6,marginTop:3}}>{l}</div>
+            </div>
+          ))}
+        </div>
+        <button onClick={()=>setStep("quiz")} style={{width:"100%",padding:"18px 0",borderRadius:12,background:`linear-gradient(135deg,${C.orange},${C.teal})`,border:"none",color:C.white,fontSize:17,fontWeight:700,letterSpacing:"0.08em",cursor:"pointer",textTransform:"uppercase"}}>
+          Discover My Prakriti →
+        </button>
+        <p style={{textAlign:"center",marginTop:16,fontSize:12,color:C.cream,opacity:0.4}}>Free · Created by @thebodhlife</p>
+      </div>
+    </div>
+  );
+
+  if (step === "quiz") return (
+    <div style={{minHeight:"100vh",background:C.cream,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"24px 16px 48px"}}>
+      <div style={{maxWidth:580,width:"100%"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <p style={{fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:C.teal,textTransform:"uppercase"}}>The Bodh Life · Prakriti Quiz</p>
+          <p style={{fontSize:12,color:C.grey}}>{qi+1} / {QUESTIONS.length}</p>
+        </div>
+        <ProgressBar current={qi+1} total={QUESTIONS.length}/>
+        <div style={{marginBottom:16}}>
+          <span style={{display:"inline-block",padding:"4px 12px",borderRadius:20,fontSize:12,fontWeight:600,background:CAT_COLORS[q.category]+"22",color:CAT_COLORS[q.category],border:`1px solid ${CAT_COLORS[q.category]}44`}}>{q.category}</span>
+        </div>
+        <h2 style={{fontSize:24,fontWeight:700,color:C.charcoal,lineHeight:1.35,marginBottom:28}}>{q.q}</h2>
+        <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:28}}>
+          {q.opts.map((opt,i)=>{
+            const isSel = selected===opt;
+            return (
+              <button key={i} onClick={()=>!animating&&setSelected(opt)} style={{width:"100%",textAlign:"left",padding:"18px 20px",borderRadius:12,border:`2px solid ${isSel?C.teal:"#DDD6CC"}`,background:isSel?C.teal+"15":C.white,cursor:"pointer",transition:"all 0.2s",transform:isSel?"scale(1.01)":"scale(1)"}}>
+                <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
+                  <div style={{width:22,height:22,borderRadius:"50%",flexShrink:0,marginTop:1,border:`2px solid ${isSel?C.teal:"#BBB"}`,background:isSel?C.teal:"transparent",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    {isSel&&<div style={{width:8,height:8,borderRadius:"50%",background:C.white}}/>}
+                  </div>
+                  <p style={{margin:0,fontSize:16,lineHeight:1.5,color:isSel?C.charcoal:"#5a4a38",fontWeight:isSel?500:400}}>{opt.label}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <button onClick={handleNext} disabled={!selected} style={{width:"100%",padding:"16px 0",borderRadius:12,background:selected?C.teal:"#C8BFAF",border:"none",color:C.white,fontSize:16,fontWeight:700,letterSpacing:"0.06em",cursor:selected?"pointer":"not-allowed",transition:"background 0.2s",textTransform:"uppercase"}}>
+          {qi+1===QUESTIONS.length?"See My Results →":"Next Question →"}
+        </button>
+        {qi>0&&<button onClick={()=>{setQi(qi-1);setSelected(null);}} style={{display:"block",margin:"16px auto 0",background:"none",border:"none",color:C.grey,fontSize:13,cursor:"pointer"}}>← Back</button>}
+      </div>
+    </div>
+  );
+
+  if (step === "email") return (
+    <EmailGate profileTitle={profile.title} onSubmit={()=>setStep("result")} onSkip={()=>setStep("result")}/>
+  );
+
+  return (
+    <div style={{minHeight:"100vh",background:C.cream,padding:"0 0 60px"}}>
+      <div style={{background:profile.color,padding:"48px 24px 36px",textAlign:"center"}}>
+        <p style={{fontSize:11,fontWeight:700,letterSpacing:"0.28em",color:"rgba(255,255,255,0.65)",textTransform:"uppercase",marginBottom:10}}>Your Prakriti · The Bodh Life</p>
+        <h1 style={{fontSize:48,fontWeight:700,color:C.white,lineHeight:1,marginBottom:6}}>{profile.title}</h1>
+        <p style={{fontStyle:"italic",fontSize:22,color:"rgba(255,255,255,0.82)",marginBottom:16}}>{profile.subtitle}</p>
+        <p style={{fontSize:17,color:"rgba(255,255,255,0.9)",lineHeight:1.6,maxWidth:440,margin:"0 auto"}}>"{profile.tagline}"</p>
+      </div>
+      <div style={{maxWidth:600,margin:"0 auto",padding:"0 16px"}}>
+        <div style={{background:C.white,borderRadius:16,padding:24,margin:"24px 0 16px",boxShadow:"0 2px 12px rgba(44,24,16,0.06)"}}>
+          <p style={{fontSize:12,fontWeight:700,letterSpacing:"0.16em",color:C.grey,textTransform:"uppercase",marginBottom:18}}>Your Tridosha Balance</p>
+          <DoshaBar label="VATA (Air + Space)" value={scores.V} max={maxVal} color={C.vata}/>
+          <DoshaBar label="PITTA (Fire + Water)" value={scores.P} max={maxVal} color={C.pitta}/>
+          <DoshaBar label="KAPHA (Earth + Water)" value={scores.K} max={maxVal} color={C.kapha}/>
+        </div>
+        <Section icon="🌿" title="Your Constitution" borderColor={profile.color}>
+          <p style={{fontSize:16,color:C.charcoal,lineHeight:1.75}}>{profile.summary}</p>
+        </Section>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+          <div style={{background:C.teal+"12",borderRadius:12,padding:18,border:`1px solid ${C.teal}33`}}>
+            <p style={{fontSize:11,fontWeight:700,letterSpacing:"0.14em",color:C.teal,textTransform:"uppercase",marginBottom:12}}>Your Gifts</p>
+            {profile.strengths.map((s,i)=>(
+              <p key={i} style={{fontSize:14,color:C.charcoal,lineHeight:1.5,marginBottom:8,paddingLeft:14,position:"relative"}}>
+                <span style={{position:"absolute",left:0,color:C.teal}}>◉</span>{s}
+              </p>
+            ))}
+          </div>
+          <div style={{background:C.pitta+"10",borderRadius:12,padding:18,border:`1px solid ${C.pitta}33`}}>
+            <p style={{fontSize:11,fontWeight:700,letterSpacing:"0.14em",color:C.pitta,textTransform:"uppercase",marginBottom:12}}>Watch For</p>
+            {profile.challenges.map((s,i)=>(
+              <p key={i} style={{fontSize:14,color:C.charcoal,lineHeight:1.5,marginBottom:8,paddingLeft:14,position:"relative"}}>
+                <span style={{position:"absolute",left:0,color:C.pitta}}>▲</span>{s}
+              </p>
+            ))}
+          </div>
+        </div>
+        <Section icon="🫙" title="What to Eat" borderColor={C.orange}>
+          {profile.food.map((f,i)=>(
+            <div key={i} style={{display:"flex",gap:10,marginBottom:12,alignItems:"flex-start"}}>
+              <div style={{width:6,height:6,borderRadius:"50%",background:C.orange,marginTop:7,flexShrink:0}}/>
+              <p style={{fontSize:15,color:C.charcoal,lineHeight:1.6,margin:0}}>{f}</p>
+            </div>
+          ))}
+        </Section>
+        <Section icon="🌙" title="Daily Rituals" borderColor={C.teal}>
+          {profile.rituals.map((r,i)=>(
+            <div key={i} style={{display:"flex",gap:10,marginBottom:12,alignItems:"flex-start"}}>
+              <div style={{width:24,height:24,borderRadius:"50%",flexShrink:0,background:C.teal,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <span style={{color:C.white,fontSize:11,fontWeight:700}}>{i+1}</span>
+              </div>
+              <p style={{fontSize:15,color:C.charcoal,lineHeight:1.6,margin:0}}>{r}</p>
+            </div>
+          ))}
+        </Section>
+        <Section icon="🍂" title="Your Critical Season" borderColor={C.gold}>
+          <p style={{fontSize:15,color:C.charcoal,lineHeight:1.7}}>{profile.season}</p>
+        </Section>
+        <Section icon="🩺" title="For Your Hormones" borderColor="#9C5AB5">
+          <p style={{fontSize:15,color:C.charcoal,lineHeight:1.75}}>{profile.hormoneNote}</p>
+          <div style={{marginTop:14,padding:14,background:"#9C5AB511",borderRadius:8,border:"1px solid #9C5AB533"}}>
+            <p style={{fontSize:13,color:C.grey,lineHeight:1.6,margin:0}}>This is an educational guide, not a clinical diagnosis. For a full Ayurvedic assessment, work with a qualified practitioner.</p>
+          </div>
+        </Section>
+        <div style={{background:C.charcoal,borderRadius:16,padding:28,textAlign:"center",marginBottom:16}}>
+          <p style={{fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:C.gold,textTransform:"uppercase",marginBottom:12}}>Want to go deeper?</p>
+          <p style={{fontSize:18,color:C.white,lineHeight:1.6,marginBottom:20}}>Follow <strong style={{color:C.orange}}>@thebodhlife</strong> for weekly Ayurvedic food, rituals, and ingredient deep-dives — built for your dosha.</p>
+          <p style={{fontStyle:"italic",fontSize:15,color:C.cream,opacity:0.65,marginBottom:24}}>Live with awareness. Heal with intention.</p>
+          <button onClick={handleRestart} style={{padding:"14px 36px",borderRadius:10,background:"transparent",border:`2px solid ${C.orange}`,color:C.orange,fontSize:14,fontWeight:700,cursor:"pointer",letterSpacing:"0.06em",textTransform:"uppercase"}}>
+            Retake the Quiz
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<DoshaQuiz/>, document.getElementById('root'));
+</script>
+</body>
+</html>
